@@ -1,7 +1,7 @@
 const cookieConsentAccept = (req, res) => {
   res.cookie("cookieConsent", "accepted", {
     maxAge: 1000 * 60 * 60 * 24 * 365,
-    httpOnly: true, // true in https mode
+    httpOnly: false, // true in https mode
     sameSite: "lax", // "lax" later to prevent csrf attacks
   });
   res.status(200).json({ message: "Cookie consent accepted" });
@@ -10,7 +10,7 @@ const cookieConsentAccept = (req, res) => {
 const cookieConsentDecline = (req, res) => {
   res.cookie("cookieConsent", "declined", {
     maxAge: 1000 * 60 * 60 * 24 * 365,
-    httpOnly: true,
+    httpOnly: false, // true in https mode
     sameSite: "lax",
   });
   res.status(200).json({ message: "Cookie consent declined" });
