@@ -8,7 +8,7 @@ const updateTask = async (req, res) => {
 
   try {
     const [taskRows] = await pool.query(
-      `SELECT * FROM WHERE id = ? AND board_id = ? AND created_by = =`,
+      `SELECT * FROM tasks WHERE id = ? AND board_id = ? AND created_by = ?`,
       [taskId, boardId, userId],
     );
 
@@ -26,22 +26,26 @@ const updateTask = async (req, res) => {
 };
 
 const deleteTask = async (req, res) => {
-  const boardId = req.params.boardId;
-  const taskId = req.params.task_id;
-  const userId = req.user.userId;
+  const taskId = req.params.taskId;  // Fånga taskId från URL
+  const userId = req.user.userId;    // Säkerställ att userId är korrekt tillgängligt
 
   try {
+    // Kontrollera om tasken finns och är skapad av den inloggade användaren
     const [taskRows] = await pool.query(
-      `SELECT * FROM tasks WHERE id = ? AND board_id = ? AND created_by = ?`,
-      [taskId, boardId, userId],
+      `SELECT * FROM tasks WHERE id = ? AND created_by = ?`,
+      [taskId, userId]
     );
 
+    // Om tasken inte finns eller användaren inte har rättigheter, skicka 404
     if (!taskRows || taskRows.length === 0) {
       return res.status(404).json({ error: "Task not found or unauthorized" });
     }
+
+    // Ta bort tasken om användaren har behörighet
     await pool.query(`DELETE FROM tasks WHERE id = ?`, [taskId]);
     res.status(200).json({ message: "Task deleted successfully" });
   } catch (error) {
+    console.error("Error in deleteTask:", error);
     res.status(500).json({ error: "Failed to delete task" });
   }
 };
