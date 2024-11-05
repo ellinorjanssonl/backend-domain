@@ -39,8 +39,9 @@ const deleteBoard = async (req, res) => {
   const userId = req.user.userId;
 
   try {
+    // Kontrollera om board existerar och om användaren är skaparen
     const [boardRows] = await pool.query(
-      `SELECT * FROM boards WHERE id = ? created_by = ?`,
+      `SELECT * FROM boards WHERE id = ? AND created_by = ?`,
       [boardId, userId],
     );
 
@@ -48,11 +49,13 @@ const deleteBoard = async (req, res) => {
       return res.status(404).json({ error: "Board not found or unauthorized" });
     }
 
+    // Ta bort board och relaterade poster i board_members
     await pool.query(`DELETE FROM boards WHERE id = ?`, [boardId]);
     await pool.query(`DELETE FROM board_members WHERE board_id = ?`, [boardId]);
 
     res.status(200).json({ message: "Board deleted successfully" });
   } catch (error) {
+    console.error("Error deleting board:", error); // Loggar eventuella fel
     res.status(500).json({ error: "Failed to delete board" });
   }
 };
